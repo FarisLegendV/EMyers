@@ -1,0 +1,69 @@
+-- 📦 Cargar Tora Library (versión nueva)
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library", true))()
+
+-- 🎛 Crear ventana principal
+local window = library:CreateWindow("FarisLegend")
+
+-- ⚔️ Carpeta de combate
+local combatFolder = window:AddFolder("Combat")
+getgenv().FastAttack = false
+getgenv().FastSkill = false
+
+-- ✅ Toggle Fast Attack básico
+combatFolder:AddToggle({
+	text = "Activar Fast Attack",
+	flag = "toggle_fastattack",
+	state = false,
+	callback = function(state)
+		getgenv().FastAttack = state
+
+		if state then
+			task.spawn(function()
+				while getgenv().FastAttack do
+					local args = { 2 }
+					pcall(function()
+						game:GetService("ReplicatedStorage")
+							:WaitForChild("Events")
+							:WaitForChild("Remote")
+							:WaitForChild("Match")
+							:WaitForChild("Attack")
+							:WaitForChild("TryHammerAttack")
+							:InvokeServer(unpack(args))
+					end)
+					task.wait(0.05)
+				end
+			end)
+		end
+	end
+})
+
+-- ⚡ Toggle para Fast Skill (Habilidad especial del martillo)
+combatFolder:AddToggle({
+	text = "Usar Habilidad (Hammer_10008)",
+	flag = "toggle_fastskill",
+	state = false,
+	callback = function(state)
+		getgenv().FastSkill = state
+
+		if state then
+			task.spawn(function()
+				while getgenv().FastSkill do
+					local args = { "Hammer_10008" }
+					pcall(function()
+						game:GetService("ReplicatedStorage")
+							:WaitForChild("Events")
+							:WaitForChild("Remote")
+							:WaitForChild("Hammer")
+							:WaitForChild("Skill")
+							:WaitForChild("TryUse")
+							:InvokeServer(unpack(args))
+					end)
+					task.wait(0.1) -- espera entre skills (ajustable si no hay cooldown)
+				end
+			end)
+		end
+	end
+})
+
+-- 🧩 Inicializar GUI
+library:Init()
