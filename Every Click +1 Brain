@@ -25,7 +25,7 @@ farmFolder:AddToggle({
 					pcall(function()
 						game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Click"):FireServer()
 					end)
-					task.wait(0.1)
+					task.wait(0.05)
 				end
 			end)
 		end
@@ -61,7 +61,7 @@ farmFolder:AddToggle({
 					pcall(function()
 						game:GetService("ReplicatedStorage"):WaitForChild("ClaimGiftEvent"):FireServer(getgenv().SelectedGift)
 					end)
-					task.wait(1)
+					task.wait(0.1)
 				end
 			end)
 		end
