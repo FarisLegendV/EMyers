@@ -32,7 +32,7 @@ folder:AddList({
 
 -- Toggle: AutoSlider que solo hace Slide al mapa seleccionado
 folder:AddToggle({
-	text = "AutoSlider",
+	text = "Auto Coins",
 	flag = "auto_slider_toggle",
 	callback = function(state)
 		_G.autoSlider = state
@@ -47,7 +47,7 @@ folder:AddToggle({
 					game:GetService("ReplicatedStorage"):WaitForChild("R_Server"):FireServer(unpack(args))
 				end)
 			end
-			task.wait(1.5)
+			task.wait(0.5)
 		end
 	end
 })
