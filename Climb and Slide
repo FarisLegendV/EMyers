@@ -1,0 +1,56 @@
+-- Cargar Tora Library
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library", true))()
+
+-- Crear ventana principal
+local tab = library:CreateWindow("Farislegend")
+
+-- Carpeta Farm
+local folder = tab:AddFolder("Farm")
+
+-- Botón: Get Best Pet
+folder:AddButton({
+	text = "Get Best Pet",
+	callback = function()
+		local args = {
+			"Give_Pet",
+			"Pet_Honey_Mutant"
+		}
+		game:GetService("ReplicatedStorage"):WaitForChild("R_Pets"):FireServer(unpack(args))
+	end
+})
+
+-- Dropdown: Selección de mapa (sin hacer Slide automático)
+local selectedMap = "Map_1" -- default
+folder:AddList({
+	text = "Select Map",
+	values = {"Map_1", "Map_2", "Map_3"},
+	callback = function(value)
+		selectedMap = value -- solo guarda el mapa
+	end,
+	flag = "map_selector"
+})
+
+-- Toggle: AutoSlider que solo hace Slide al mapa seleccionado
+folder:AddToggle({
+	text = "AutoSlider",
+	flag = "auto_slider_toggle",
+	callback = function(state)
+		_G.autoSlider = state
+		while _G.autoSlider do
+			local map = workspace:WaitForChild("Maps"):FindFirstChild(selectedMap)
+			if map then
+				local args = {
+					"Slide",
+					map
+				}
+				pcall(function()
+					game:GetService("ReplicatedStorage"):WaitForChild("R_Server"):FireServer(unpack(args))
+				end)
+			end
+			task.wait(1.5)
+		end
+	end
+})
+
+-- Inicializar GUI
+library:Init()
