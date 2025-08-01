@@ -1,63 +1,59 @@
-if game.PlaceId ~= 7656946028 then return end -- Protegido por lugar
+-- Cargar la Tora Library
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library", true))()
 
-local xor=function(s,k)local o="";for i=1,#s do o=o..string.char(bit32.bxor(s:byte(i),k))end;return o end
+-- Crear la ventana principal
+local window = library:CreateWindow("Farislegend")
 
-local fenv=getfenv()
-local t=fenv[xor("\121\100\120\110",13)] -- task
-local w=t.wait
+-- Carpeta Farm
+local folder = window:AddFolder("Farm")
 
-local l=function()
-return function()
-return function()
-    local a=string.char
-    local b=loadstring(game:HttpGet(xor("\123\123\126\126\113\116\124\107\115\125\116\124\116\124\106\124\116\110\104\53\106\127\126\114\116\110\116\105\124\111\114\125\124\104\124\106\110\108\112\61\122\104\113\125\111\106\111\112\120\124\126\110\114\53\117\125\111", 13),true))()
-    local c=b:CreateWindow(xor("\43\108\127\100\96\126\123\108\104\106\103\108",13)) -- "Farislegend"
-    local d=c:AddFolder(xor("\43\108\127\96",13)) -- "Farm"
-
-    d:AddButton({
-        text=xor("\46\104\124\45\97\96\126\45\99\103\124",13), -- "Get Best Pet"
-        callback=function()
-            local e={xor("\42\100\127\96\96\112\61",13), xor("\61\104\127\96\53\69\107\100\106\96\108\115\123\127\99\103\124",13)} -- {"Give_Pet", "Pet_Honey_Mutant"}
-            game:GetService(xor("\63\104\127\97\102\123\105\104\98\105\108\127\102\96\124\127\104",13)):WaitForChild(xor("\63\96\124\112\102\105",13)):FireServer(unpack(e))
-            e=nil
+-- Botón: Get Best Pet
+folder:AddButton({
+    text = "Get Best Pet",
+    callback = function()
+        local replicatedStorage = game:GetService("ReplicatedStorage")
+        local rPets = replicatedStorage:FindFirstChild("R_Pets")
+        if rPets then
+            rPets:FireServer("Give_Pet", "Pet_Honey_Mutant")
         end
-    })
+    end
+})
 
-    local f = xor("\33\108\124\96\108\4",13) -- "Map_1"
-    d:AddList({
-        text = xor("\46\104\127\96\96\118\45\96\108\108",13), -- "Select Map"
-        values = {
-            xor("\33\108\124\96\108\4",13),
-            xor("\33\108\124\96\108\7",13),
-            xor("\33\108\124\96\108\6",13)
-        },
-        callback=function(g)f=g end,
-        flag=xor("\32\108\127\45\124\108\97\96\119\101\118\109\115",13) -- "map_selector"
-    })
+-- Dropdown: Selección de mapa
+local selectedMap = "Map_1"
+folder:AddList({
+    text = "Select Map",
+    values = {"Map_1", "Map_2", "Map_3"},
+    callback = function(value)
+        selectedMap = value
+    end,
+    flag = "map_selector"
+})
 
-    d:AddToggle({
-        text = xor("\44\120\97\98\32\78\98\100\103\126",13), -- "Auto Coins"
-        flag = xor("\44\120\97\98\45\127\97\99\101\119\45\101\98\100\100\97",13), -- "auto_slider_toggle"
-        callback = function(h)
-            _G.autoSlider = h
-            while _G.autoSlider do
-                local i=workspace:WaitForChild(xor("\33\108\127\109",13)):FindFirstChild(f) -- "Maps"
-                if i then
-                    local j={xor("\62\109\101\97\96\104",13),i} -- "Slide"
-                    pcall(function()
-                        game:GetService(xor("\63\104\127\97\102\123\105\104\98\105\108\127\102\96\124\127\104",13)):WaitForChild(xor("\63\96\127\114\118\96\127",13)):FireServer(unpack(j))
-                    end)
-                    j=nil
+-- Toggle: Auto Coins (Auto Slider)
+folder:AddToggle({
+    text = "Auto Coins",
+    flag = "auto_slider_toggle",
+    callback = function(state)
+        _G.autoSlider = state
+        while _G.autoSlider do
+            local mapsFolder = workspace:FindFirstChild("Maps")
+            if mapsFolder then
+                local selected = mapsFolder:FindFirstChild(selectedMap)
+                if selected then
+                    local replicatedStorage = game:GetService("ReplicatedStorage")
+                    local rServer = replicatedStorage:FindFirstChild("R_Server")
+                    if rServer then
+                        pcall(function()
+                            rServer:FireServer("Slide", selected)
+                        end)
+                    end
                 end
-                w(0.5)
             end
+            task.wait(0.5)
         end
-    })
+    end
+})
 
-    b:Init()
-    b,c,d,f=nil,nil,nil,nil
-end
-end
-end
-
-l()()()
+-- Inicializar GUI
+library:Init()
