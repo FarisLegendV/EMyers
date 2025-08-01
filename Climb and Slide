@@ -1,56 +1,33 @@
--- Cargar Tora Library
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library", true))()
-
--- Crear ventana principal
-local tab = library:CreateWindow("Farislegend")
-
--- Carpeta Farm
-local folder = tab:AddFolder("Farm")
-
--- Botón: Get Best Pet
-folder:AddButton({
-	text = "Get Best Pet",
-	callback = function()
-		local args = {
-			"Give_Pet",
-			"Pet_Honey_Mutant"
-		}
-		game:GetService("ReplicatedStorage"):WaitForChild("R_Pets"):FireServer(unpack(args))
-	end
+--Carga Faris Gui
+local a=loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library",true))()
+local b=a:CreateWindow("Farislegend")
+local c=b:AddFolder("Farm")
+c:AddButton({text="Get Best Pet",callback=function()
+    local d={"Give_Pet","Pet_Honey_Mutant"}
+    game:GetService("ReplicatedStorage"):WaitForChild("R_Pets"):FireServer(unpack(d))
+end})
+local e="Map_1"
+c:AddList({
+    text="Select Map",
+    values={"Map_1","Map_2","Map_3"},
+    callback=function(f)e=f end,
+    flag="map_selector"
 })
-
--- Dropdown: Selección de mapa (sin hacer Slide automático)
-local selectedMap = "Map_1" -- default
-folder:AddList({
-	text = "Select Map",
-	values = {"Map_1", "Map_2", "Map_3"},
-	callback = function(value)
-		selectedMap = value -- solo guarda el mapa
-	end,
-	flag = "map_selector"
+c:AddToggle({
+    text="Auto Coins",
+    flag="auto_slider_toggle",
+    callback=function(g)
+        _G.autoSlider=g
+        while _G.autoSlider do
+            local h=workspace:WaitForChild("Maps"):FindFirstChild(e)
+            if h then
+                local i={"Slide",h}
+                pcall(function()
+                    game:GetService("ReplicatedStorage"):WaitForChild("R_Server"):FireServer(unpack(i))
+                end)
+            end
+            task.wait(0.5)
+        end
+    end
 })
-
--- Toggle: AutoSlider que solo hace Slide al mapa seleccionado
-folder:AddToggle({
-	text = "Auto Coins",
-	flag = "auto_slider_toggle",
-	callback = function(state)
-		_G.autoSlider = state
-		while _G.autoSlider do
-			local map = workspace:WaitForChild("Maps"):FindFirstChild(selectedMap)
-			if map then
-				local args = {
-					"Slide",
-					map
-				}
-				pcall(function()
-					game:GetService("ReplicatedStorage"):WaitForChild("R_Server"):FireServer(unpack(args))
-				end)
-			end
-			task.wait(0.5)
-		end
-	end
-})
-
--- Inicializar GUI
-library:Init()
+a:Init()
