@@ -1,53 +1,60 @@
 -- Cargar la librería Tora
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/librarynew", true))()
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library", true))()
 
--- Crear ventana y carpeta
+-- Crear ventana principal
 local tab = library:CreateWindow("Farislegend")
-local folder = tab:AddFolder("Farm")
 
--- Toggle para Auto Dig (kg)
-folder:AddToggle({
-    text = "Dig (kg)",
-    flag = "dig_toggle",
-    callback = function(state)
-        getgenv().AutoDig = state
-        task.spawn(function()
-            while getgenv().AutoDig do
-                local args = {
-                    1000000000, -- cantidad de kg
-                    0.8,        -- modificador
-                    1.7         -- multiplicador
-                }
-                game:GetService("ReplicatedStorage"):WaitForChild("DigEvent"):FireServer(unpack(args))
-                task.wait(0.5)
-            end
-        end)
-    end
+-- Carpeta Farm
+local farmFolder = tab:AddFolder("Farm")
+
+-- Toggle: Dig (kg)
+farmFolder:AddToggle({
+	text = "Dig (kg)",
+	flag = "dig_toggle",
+	callback = function(state)
+		if state then
+			_G.dig = true
+			while _G.dig do
+				local args = {
+					1000000000,
+					0.8,
+					1.70
+				}
+				game:GetService("ReplicatedStorage"):WaitForChild("DigEvent"):FireServer(unpack(args))
+				task.wait(0.2)
+			end
+		else
+			_G.dig = false
+		end
+	end
 })
 
--- Toggle para Auto Sell (ALL)
-folder:AddToggle({
-    text = "Auto Sell (ALL)",
-    flag = "sell_toggle",
-    callback = function(state)
-        getgenv().AutoSell = state
-        task.spawn(function()
-            while getgenv().AutoSell do
-                local sellRemote = game:GetService("Players").LocalPlayer
-                    :WaitForChild("PlayerGui")
-                    :WaitForChild("TraderUi")
-                    :WaitForChild("ImageLabel")
-                    :WaitForChild("Frame")
-                    :WaitForChild("SellButton")
-                    :WaitForChild("LocalScript")
-                    :WaitForChild("RemoteEvent")
-
-                sellRemote:FireServer()
-                task.wait(0.1)
-            end
-        end)
-    end
+-- Toggle: Sell (ALL)
+farmFolder:AddToggle({
+	text = "Sell (ALL)",
+	flag = "sell_toggle",
+	callback = function(state)
+		if state then
+			_G.sell = true
+			while _G.sell do
+				local success, err = pcall(function()
+					game:GetService("Players").LocalPlayer
+						:WaitForChild("PlayerGui")
+						:WaitForChild("TraderUi")
+						:WaitForChild("ImageLabel")
+						:WaitForChild("Frame")
+						:WaitForChild("SellButton")
+						:WaitForChild("LocalScript")
+						:WaitForChild("RemoteEvent")
+						:FireServer()
+				end)
+				task.wait(0.5)
+			end
+		else
+			_G.sell = false
+		end
+	end
 })
 
--- Mostrar la GUI
+-- Inicializar la GUI
 library:Init()
