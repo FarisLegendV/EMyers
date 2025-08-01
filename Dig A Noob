@@ -1,0 +1,53 @@
+-- Cargar la librería Tora
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/librarynew", true))()
+
+-- Crear ventana y carpeta
+local tab = library:CreateWindow("Farislegend")
+local folder = tab:AddFolder("Farm")
+
+-- Toggle para Auto Dig (kg)
+folder:AddToggle({
+    text = "Dig (kg)",
+    flag = "dig_toggle",
+    callback = function(state)
+        getgenv().AutoDig = state
+        task.spawn(function()
+            while getgenv().AutoDig do
+                local args = {
+                    1000000000, -- cantidad de kg
+                    0.8,        -- modificador
+                    1.7         -- multiplicador
+                }
+                game:GetService("ReplicatedStorage"):WaitForChild("DigEvent"):FireServer(unpack(args))
+                task.wait(0.5)
+            end
+        end)
+    end
+})
+
+-- Toggle para Auto Sell (ALL)
+folder:AddToggle({
+    text = "Auto Sell (ALL)",
+    flag = "sell_toggle",
+    callback = function(state)
+        getgenv().AutoSell = state
+        task.spawn(function()
+            while getgenv().AutoSell do
+                local sellRemote = game:GetService("Players").LocalPlayer
+                    :WaitForChild("PlayerGui")
+                    :WaitForChild("TraderUi")
+                    :WaitForChild("ImageLabel")
+                    :WaitForChild("Frame")
+                    :WaitForChild("SellButton")
+                    :WaitForChild("LocalScript")
+                    :WaitForChild("RemoteEvent")
+
+                sellRemote:FireServer()
+                task.wait(0.1)
+            end
+        end)
+    end
+})
+
+-- Mostrar la GUI
+library:Init()
