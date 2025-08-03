@@ -1,0 +1,85 @@
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library"))()
+local tab = library:CreateWindow("Farislegend")
+local folder = tab:AddFolder("Farm")
+
+-- Función de desencriptado (Caesar -1)
+local decrypt = function(text)
+    return text:gsub(".", function(c)
+        return string.char(c:byte() - 1)
+    end)
+end
+
+-- Textos encriptados
+local encryptedText = {
+    fastSize = decrypt("Gbtu!Tj{f"),       -- "Fast Size"
+    autoRebirth = decrypt("Bvup!Sfcjsui"), -- "Auto Rebirth"
+    tpWins = decrypt("UQ!Xjot"),           -- "TP Wins"
+}
+
+-- Nombres de remotes encriptados
+local encryptedRemotes = {
+    increaseSize = decrypt("JodsfbtfTj{f"),  -- "IncreaseSize"
+    rebirthEvent = decrypt("SfcjsuiFwfou"), -- "RebirthEvent"
+}
+
+-- Acceso desencriptado a remotes
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local IncreaseRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild(encryptedRemotes.increaseSize)
+local RebirthRemote = ReplicatedStorage:WaitForChild("Events"):WaitForChild(encryptedRemotes.rebirthEvent)
+
+-- Toggle: Fast Size
+folder:AddToggle({
+    text = encryptedText.fastSize,
+    flag = "fast_size_toggle",
+    callback = function(state)
+        _G.fastSize = state
+    end
+})
+
+-- Toggle: Auto Rebirth
+folder:AddToggle({
+    text = encryptedText.autoRebirth,
+    flag = "auto_rebirth_toggle",
+    callback = function(state)
+        _G.autoRebirth = state
+        task.spawn(function()
+            while _G.autoRebirth do
+                pcall(function()
+                    RebirthRemote:FireServer()
+                end)
+                task.wait(1)
+            end
+        end)
+    end
+})
+
+-- Botón: TP Wins
+folder:AddButton({
+    text = encryptedText.tpWins,
+    callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local hrp = character:WaitForChild("HumanoidRootPart")
+
+        for _, button in pairs(workspace.WinButtons:GetChildren()) do
+            local press = button:FindFirstChild("Press")
+            if press and press:IsA("BasePart") then
+                hrp.CFrame = press.CFrame + Vector3.new(0, 3, 0)
+                task.wait(0.2)
+            end
+        end
+    end
+})
+
+-- Fast Size ejecutado en Heartbeat
+local RunService = game:GetService("RunService")
+
+RunService.Heartbeat:Connect(function()
+    if _G.fastSize then
+        pcall(function()
+            IncreaseRemote:FireServer()
+        end)
+    end
+end)
+
+library:Init()
