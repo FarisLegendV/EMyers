@@ -1,0 +1,201 @@
+-- 📦 Cargar Tora Library
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library", true))()
+
+-- 🪄 Crear ventana
+local window = library:CreateWindow("FarisLegend")
+
+-- 📁 Carpeta principal
+local folder = window:AddFolder("Main")
+
+-- 📁 Carpeta TP Doors
+local tpFolder = window:AddFolder("TP Doors")
+
+-- 🔁 Variables globales
+getgenv().ESPEnabled = false
+getgenv().AutoTPDoor = false
+getgenv().SelectedDoorName = nil
+
+-- 🎨 Mapa de colores para ESP
+local ESPColorMap = {
+    Red = Color3.fromRGB(255, 0, 0),
+    Blue = Color3.fromRGB(0, 0, 255),
+    Green = Color3.fromRGB(0, 255, 0),
+    Yellow = Color3.fromRGB(255, 255, 0),
+    Brown = Color3.fromRGB(139, 69, 19),
+    Purple = Color3.fromRGB(128, 0, 128),
+    Grey = Color3.fromRGB(128, 128, 128),
+    White = Color3.fromRGB(255, 255, 255),
+    Vent = Color3.fromRGB(0, 255, 255),
+    Crowbar = Color3.fromRGB(255, 165, 0),
+    Plank = Color3.fromRGB(160, 82, 45),
+}
+
+-- 🧱 Crear BoxHandleAdornment (ESP)
+local function createESP(part, color)
+    local box = Instance.new("BoxHandleAdornment")
+    box.Size = part.Size
+    box.Adornee = part
+    box.AlwaysOnTop = true
+    box.ZIndex = 10
+    box.Color3 = color
+    box.Transparency = 0.3
+    box.Name = "_FarisESP"
+    box.Parent = part
+end
+
+-- 🚫 Quitar ESPs
+local function clearESP()
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("BoxHandleAdornment") and obj.Name == "_FarisESP" then
+            obj:Destroy()
+        end
+    end
+end
+
+-- 🗺 Aplicar ESP
+local function applyESP()
+    clearESP()
+
+    -- Puertas
+    for _, obj in pairs(workspace:GetChildren()) do
+        for nameKey, color in pairs(ESPColorMap) do
+            if obj:IsA("Model") and obj.Name:lower():find(nameKey:lower()) and obj:FindFirstChild("Door") then
+                local doorPart = obj:FindFirstChild("Door")
+                if doorPart:IsA("Part") or doorPart:IsA("UnionOperation") then
+                    createESP(doorPart, color)
+                elseif doorPart:IsA("Model") then
+                    for _, p in pairs(doorPart:GetDescendants()) do
+                        if p:IsA("BasePart") then
+                            createESP(p, color)
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    -- Llaves
+    local keyFolder = workspace:FindFirstChild("KeyGivers")
+    if keyFolder then
+        for _, part in pairs(keyFolder:GetChildren()) do
+            for nameKey, color in pairs(ESPColorMap) do
+                if part:IsA("BasePart") and part.Name:lower():find(nameKey:lower()) then
+                    createESP(part, color)
+                end
+            end
+        end
+    end
+end
+
+-- 🟢 Toggle: ESP Doors & Keys
+folder:AddToggle({
+    text = "ESP Doors & Keys",
+    flag = "esp_doors_keys",
+    state = false,
+    callback = function(state)
+        getgenv().ESPEnabled = state
+        if state then
+            applyESP()
+        else
+            clearESP()
+        end
+    end
+})
+
+-- 🪙 Botón: Touch Coin
+folder:AddButton({
+    text = "Touch Coin",
+    callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local hrp = character:WaitForChild("HumanoidRootPart")
+
+        for _, coin in ipairs(workspace:WaitForChild("Coins"):GetChildren()) do
+            if coin:IsA("BasePart") and coin:FindFirstChild("TouchInterest") then
+                firetouchinterest(hrp, coin, 0)
+                task.wait(0.1)
+                firetouchinterest(hrp, coin, 1)
+            end
+        end
+    end
+})
+
+-- 💎 Botón: TP Diamonds
+folder:AddButton({
+    text = "TP Diamonds",
+    callback = function()
+        local player = game.Players.LocalPlayer
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
+        local diamonds = {}
+
+        for _, obj in pairs(workspace.Logs:GetDescendants()) do
+            if obj:IsA("Part") and obj.Name == "Diamond" and obj:FindFirstChildOfClass("ProximityPrompt") then
+                table.insert(diamonds, obj)
+            end
+        end
+
+        for _, diamond in ipairs(diamonds) do
+            hrp.CFrame = diamond.CFrame + diamond.CFrame.LookVector * -3 + Vector3.new(0, 2, 0)
+            task.wait(0.3)
+
+            local prompt = diamond:FindFirstChildOfClass("ProximityPrompt")
+            if prompt then
+                fireproximityprompt(prompt)
+            end
+
+            task.wait(0.3)
+        end
+    end
+})
+
+-- 🌈 Dropdown: Lista de puertas
+local doorList = {
+    "RedDoor", "BlueDoor", "GreenDoor", "YellowDoor", "BrownDoor",
+    "PurpleDoor", "GreyDoor", "WhiteDoor", "VentDoor"
+}
+
+tpFolder:AddList({
+    text = "Select Door",
+    values = doorList,
+    flag = "selected_door",
+    open = false,
+    callback = function(value)
+        getgenv().SelectedDoorName = value
+    end
+})
+
+-- 🚪 Toggle: Activar TP a la puerta seleccionada
+tpFolder:AddToggle({
+    text = "Auto TP to Door",
+    flag = "tp_door_toggle",
+    state = false,
+    callback = function(state)
+        getgenv().AutoTPDoor = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoTPDoor do
+                    local player = game.Players.LocalPlayer
+                    local char = player.Character or player.CharacterAdded:Wait()
+                    local hrp = char:WaitForChild("HumanoidRootPart")
+                    local name = getgenv().SelectedDoorName
+
+                    if name then
+                        local doorModel = workspace:FindFirstChild(name)
+                        if doorModel and doorModel:FindFirstChild("Door") then
+                            local doorPart = doorModel.Door
+                            if doorPart:IsA("BasePart") then
+                                hrp.CFrame = doorPart.CFrame + doorPart.CFrame.LookVector * -3 + Vector3.new(0, 2, 0)
+                            end
+                        end
+                    end
+                    task.wait(1.5)
+                end
+            end)
+        end
+    end
+})
+
+-- ✅ Iniciar la GUI
+library:Init()
