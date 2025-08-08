@@ -1,0 +1,71 @@
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library", true))()
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local tab = library:CreateWindow("TP to Players")
+local folder = tab:AddFolder("Players")
+
+-- Variable para guardar el jugador seleccionado y estado del toggle
+local selectedPlayer = nil
+local autoTPEnabled = false
+
+-- Función para obtener nombres de jugadores
+local function getPlayerNames()
+	local names = {}
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer then
+			table.insert(names, player.Name)
+		end
+	end
+	return names
+end
+
+-- Dropdown para elegir jugador objetivo (no TP automático al elegir)
+folder:AddList({
+	text = "Select Player",
+	values = getPlayerNames(),
+	callback = function(value)
+		selectedPlayer = Players:FindFirstChild(value)
+	end,
+	open = false,
+	flag = "selected_target"
+})
+
+-- Botón para hacer TP una sola vez
+folder:AddButton({
+	text = "TP Once to Player",
+	flag = "tp_once",
+	callback = function()
+		if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
+			end
+		end
+	end
+})
+
+-- Toggle para hacer TP continuo
+folder:AddToggle({
+	text = "Auto TP to Player",
+	flag = "auto_tp",
+	callback = function(value)
+		autoTPEnabled = value
+	end
+})
+
+-- Loop para TP automático
+task.spawn(function()
+	while true do
+		task.wait(1)
+		if autoTPEnabled and selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
+			end
+		end
+	end
+end)
+
+-- Obligatorio
+library:Init()
