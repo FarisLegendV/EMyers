@@ -1,0 +1,134 @@
+-- Cargar Tora Library
+ library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library", true))()
+
+-- Crear GUI
+local window = library:CreateWindow("FarisLegend")
+local folder = window:AddFolder("main")
+
+local player = game.Players.LocalPlayer
+
+-- Toggle: Collect Cash
+folder:AddToggle({
+    text = "Collect Cash",
+    flag = "collect_cash",
+    callback = function(v)
+        _G._collectCash = v
+        if v then
+            task.spawn(function()
+                local character = player.Character or player.CharacterAdded:Wait()
+                local hrp = character:WaitForChild("HumanoidRootPart")
+                local objectsFolder = workspace:WaitForChild("Plots"):WaitForChild("FarisLegendV3"):WaitForChild("Objects")
+
+                while _G._collectCash do
+                    for _, obj in pairs(objectsFolder:GetChildren()) do
+                        local collectPad = obj:FindFirstChild("CollectPad")
+                        if collectPad and collectPad:IsA("BasePart") and hrp then
+                            firetouchinterest(hrp, collectPad, 0)
+                            task.wait()
+                            firetouchinterest(hrp, collectPad, 1)
+                        end
+                    end
+                    task.wait(0.5)
+                end
+            end)
+        end
+    end
+})
+
+-- Toggle: Auto Lock Base
+folder:AddToggle({
+    text = "Lock Base",
+    flag = "lock_base",
+    callback = function(v)
+        _G._lockBase = v
+        if v then
+            task.spawn(function()
+                local character = player.Character or player.CharacterAdded:Wait()
+                local hrp = character:WaitForChild("HumanoidRootPart")
+                local lockPart = workspace:WaitForChild("Plots"):WaitForChild("FarisLegendV3"):WaitForChild("LockBase")
+
+                while _G._lockBase do
+                    if hrp and lockPart then
+                        firetouchinterest(hrp, lockPart, 0)
+                        task.wait(0.1)
+                        firetouchinterest(hrp, lockPart, 1)
+                    end
+                    task.wait(0.3)
+                end
+            end)
+        end
+    end
+})
+
+-- Botón: Steal Nearest NPC (REEMPLAZADO)
+folder:AddButton({
+    text = "Instant Steal",
+    flag = "steal_npc",
+    callback = function()
+        task.wait(1) -- Espera para que todo cargue
+
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local LocalPlayer = Players.LocalPlayer
+        local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+        -- Lista de NPC válidos
+        local npcList = {}
+        for _, obj in pairs(ReplicatedStorage:WaitForChild("Objects"):GetChildren()) do
+            npcList[obj.Name] = true
+        end
+
+        -- Función para robar el más cercano
+        local function stealNearest()
+            local closestPrompt
+            local shortestDistance = math.huge
+
+            for _, plot in pairs(workspace:WaitForChild("Plots"):GetChildren()) do
+                local objectsFolder = plot:FindFirstChild("Objects")
+                if objectsFolder then
+                    for _, obj in pairs(objectsFolder:GetChildren()) do
+                        if npcList[obj.Name] then
+                            local hrp = obj:FindFirstChild("HumanoidRootPart")
+                            if hrp then
+                                local prompt = hrp:FindFirstChild("Action")
+                                if prompt and prompt:IsA("ProximityPrompt") then
+                                    local distance = (HumanoidRootPart.Position - hrp.Position).Magnitude
+                                    if distance < shortestDistance then
+                                        shortestDistance = distance
+                                        closestPrompt = prompt
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+
+            if closestPrompt then
+                fireproximityprompt(closestPrompt)
+            else
+                warn("No se encontró ningún NPC cercano con prompt 'Action'.")
+            end
+        end
+
+        stealNearest()
+    end
+})
+
+-- Botón: TP Base
+folder:AddButton({
+    text = "TP Base",
+    flag = "tp_base",
+    callback = function()
+        local base = workspace:WaitForChild("Plots"):FindFirstChild("FarisLegendV3")
+        if base and player.Character then
+            local pos = base:FindFirstChild("TeleportPosition")
+            local cframe = pos and pos.CFrame or base:GetPivot()
+            player.Character:PivotTo(cframe)
+        end
+    end
+})
+
+-- Mostrar GUI
+library:Init()
