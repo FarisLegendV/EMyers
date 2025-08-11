@@ -11,7 +11,7 @@ local upgradeRunning = false
 
 -- // Generator Bomb (500T)
 folder:AddToggle({
-    text = "Generator Bomb",
+    text = "GeT Bomb",
     flag = "generator_bomb",
     callback = function(state)
         bombRunning = state
@@ -29,7 +29,7 @@ folder:AddToggle({
 
 -- // Generator Wins (500T)
 folder:AddToggle({
-    text = "Generator Wins",
+    text = "Get Wins",
     flag = "generator_wins",
     callback = function(state)
         winsRunning = state
