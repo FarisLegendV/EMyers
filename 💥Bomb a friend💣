@@ -1,0 +1,132 @@
+-- // Cargar Tora Library
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library",true))()
+local tab = library:CreateWindow("FarisLegend")
+local folder = tab:AddFolder("Main")
+
+-- Variables de control para los toggles
+local bombRunning = false
+local winsRunning = false
+local pointsRunning = false
+local upgradeRunning = false
+
+-- // Generator Bomb (500T)
+folder:AddToggle({
+    text = "Generator Bomb",
+    flag = "generator_bomb",
+    callback = function(state)
+        bombRunning = state
+        if bombRunning then
+            task.spawn(function()
+                while bombRunning do
+                    local args = {"Power", 500000000000000}
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("DataEvent"):FireServer(unpack(args))
+                    task.wait(0.05)
+                end
+            end)
+        end
+    end
+})
+
+-- // Generator Wins (500T)
+folder:AddToggle({
+    text = "Generator Wins",
+    flag = "generator_wins",
+    callback = function(state)
+        winsRunning = state
+        if winsRunning then
+            task.spawn(function()
+                while winsRunning do
+                    local args = {"Reward", 500000000000000}
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("DataEvent"):FireServer(unpack(args))
+                    task.wait(0.05)
+                end
+            end)
+        end
+    end
+})
+
+-- // Get Point (100B)
+folder:AddToggle({
+    text = "Get Point",
+    flag = "get_point",
+    callback = function(state)
+        pointsRunning = state
+        if pointsRunning then
+            task.spawn(function()
+                while pointsRunning do
+                    local args = {"Gem", 100000000000}
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("DataEvent"):FireServer(unpack(args))
+                    task.wait(0.05)
+                end
+            end)
+        end
+    end
+})
+
+-- // Auto Upgrade All (toggle) → ahora 4ª posición
+folder:AddToggle({
+    text = "Auto Upgrade All",
+    flag = "auto_upgrade_all",
+    callback = function(state)
+        upgradeRunning = state
+        if upgradeRunning then
+            task.spawn(function()
+                while upgradeRunning do
+                    local upgrades = {
+                        "RainbowCrafted",
+                        "GoldenCrafted",
+                        "Lucky",
+                        "DoubleReward",
+                        "MoreReward",
+                        "MoreAcceleration",
+                        "MoreStar",
+                        "MorePower"
+                    }
+                    for _, upgrade in ipairs(upgrades) do
+                        local args = {upgrade}
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("UpgradeEvent"):FireServer(unpack(args))
+                        task.wait(0.005)
+                    end
+                end
+            end)
+        end
+    end
+})
+
+-- // Best Egg X8 (botón)
+folder:AddButton({
+    text = "Best Egg X8",
+    flag = "best_egg_x8",
+    callback = function()
+        local args = {
+            "TryDrawPet",
+            {
+                Currency = "Reward",
+                Count = 8,
+                EggId = "Egg15",
+                Price = 15000000000,
+                PetRate = {
+                    Egg15_3 = 1370000,
+                    Egg15_5 = 20000,
+                    Egg15_1 = 82130000,
+                    Egg15_4 = 50000,
+                    Egg15_2 = 16430000
+                }
+            },
+            8
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("PetEvent"):FireServer(unpack(args))
+    end
+})
+
+-- // Destroy GUI (último)
+folder:AddButton({
+    text = "Destroy GUI",
+    flag = "destroy_gui",
+    callback = function()
+        library:Close()
+    end
+})
+
+-- Inicializar UI
+library:Init()
