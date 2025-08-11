@@ -1,18 +1,17 @@
--- // Cargar Tora Library
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library",true))()
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library", true))()
 local tab = library:CreateWindow("FarisLegend")
 local folder = tab:AddFolder("Main")
 
--- Variables de control para los toggles
 local bombRunning = false
 local winsRunning = false
-local pointsRunning = false
+local starRunning = false
+local rebirthRunning = false
 local upgradeRunning = false
 
--- // Generator Bomb (500T)
+-- Get Bomb (500T)
 folder:AddToggle({
     text = "Get Bomb",
-    flag = "generator_bomb",
+    flag = "get_bomb",
     callback = function(state)
         bombRunning = state
         if bombRunning then
@@ -20,17 +19,17 @@ folder:AddToggle({
                 while bombRunning do
                     local args = {"Power", 500000000000000}
                     game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("DataEvent"):FireServer(unpack(args))
-                    task.wait(0.05)
+                    task.wait(0.1)
                 end
             end)
         end
     end
 })
 
--- // Generator Wins (500T)
+-- Get Wins (500T)
 folder:AddToggle({
     text = "Get Wins",
-    flag = "generator_wins",
+    flag = "get_wins",
     callback = function(state)
         winsRunning = state
         if winsRunning then
@@ -38,32 +37,50 @@ folder:AddToggle({
                 while winsRunning do
                     local args = {"Reward", 500000000000000}
                     game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("DataEvent"):FireServer(unpack(args))
-                    task.wait(0.05)
+                    task.wait(0.1)
                 end
             end)
         end
     end
 })
 
--- // Get Point (100B)
+-- Get Star (100B)
 folder:AddToggle({
     text = "Get Star",
-    flag = "get_point",
+    flag = "get_star",
     callback = function(state)
-        pointsRunning = state
-        if pointsRunning then
+        starRunning = state
+        if starRunning then
             task.spawn(function()
-                while pointsRunning do
+                while starRunning do
                     local args = {"Gem", 100000000000}
                     game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("DataEvent"):FireServer(unpack(args))
-                    task.wait(0.05)
+                    task.wait(0.1)
                 end
             end)
         end
     end
 })
 
--- // Auto Upgrade All (toggle) → ahora 4ª posición
+-- Auto Rebirth
+folder:AddToggle({
+    text = "Auto Rebirth",
+    flag = "auto_rebirth",
+    callback = function(state)
+        rebirthRunning = state
+        if rebirthRunning then
+            task.spawn(function()
+                while rebirthRunning do
+                    local args = {"Rebirth"}
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RebirthEvent"):FireServer(unpack(args))
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end
+})
+
+-- Auto Upgrade All
 folder:AddToggle({
     text = "Auto Upgrade All",
     flag = "auto_upgrade_all",
@@ -85,7 +102,7 @@ folder:AddToggle({
                     for _, upgrade in ipairs(upgrades) do
                         local args = {upgrade}
                         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("UpgradeEvent"):FireServer(unpack(args))
-                        task.wait(0.005)
+                        task.wait(0.1)
                     end
                 end
             end)
@@ -93,7 +110,7 @@ folder:AddToggle({
     end
 })
 
--- // Best Egg X8 (botón)
+-- Best Egg X8 (botón)
 folder:AddButton({
     text = "Best Egg X8",
     flag = "best_egg_x8",
@@ -119,7 +136,7 @@ folder:AddButton({
     end
 })
 
--- // Destroy GUI (último)
+-- Destroy GUI (último)
 folder:AddButton({
     text = "Destroy GUI",
     flag = "destroy_gui",
@@ -128,5 +145,4 @@ folder:AddButton({
     end
 })
 
--- Inicializar UI
 library:Init()
