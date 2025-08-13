@@ -1,0 +1,56 @@
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library", true))()
+
+local tab = library:CreateWindow("FarisLegend")
+local folder = tab:AddFolder("main")
+
+-- TextBox para mover hacia arriba en studs
+folder:AddBox({
+    text = "Studs 1-999",
+    callback = function(valor)
+        local studs = tonumber(valor)
+        if studs then
+            local player = game.Players.LocalPlayer
+            local char = player.Character or player.CharacterAdded:Wait()
+            char:PivotTo(char:GetPivot() * CFrame.new(0, studs, 0))
+        else
+            warn("Ingresa un número válido.")
+        end
+    end
+})
+
+-- Lista completa de ítems
+local items = {
+    "Block", "Seat", "Wing", "Fuel Tank", "Light Block", "Glass Block", "Thruster",
+    "Super Wing", "Super Fuel Tank", "Super Thruster", "Ultra Fuel Tank", "Tail",
+    "Super Tail", "Mega Fuel Tank", "Ultra Thruster"
+}
+
+-- Toggle para comprar todos los ítems
+folder:AddToggle({
+    text = "Buy All",
+    callback = function(state)
+        if state then
+            task.spawn(function()
+                while state do
+                    for _, item in ipairs(items) do
+                        local args = {
+                            {
+                                ["\004"] = {
+                                    {
+                                        item,
+                                        n = 1
+                                    }
+                                }
+                            },
+                            {}
+                        }
+                        game:GetService("ReplicatedStorage"):WaitForChild("ReliableRedEvent"):FireServer(unpack(args))
+                        task.wait(0.005)-- delay para no saturar
+                    end
+                end
+            end)
+        end
+    end
+})
+
+library:Init()
