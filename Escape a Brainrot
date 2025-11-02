@@ -25,11 +25,11 @@ local Window = ArrayField:CreateWindow({
 local MainTab = Window:CreateTab("🏠 Main", 4483362458)
 
 -- Sección World 1
-local World1Section = MainTab:CreateSection("World 1", false) -- false = sección desplegable
+local World1Section = MainTab:CreateSection("Worlds", false) -- false = sección desplegable
 
 local TouchLoopActive = false
 MainTab:CreateToggle({
-    Name = "Auto Touch WinArea",
+    Name = "Auto Wins",
     CurrentValue = false,
     SectionParent = World1Section,
     Callback = function(Value)
