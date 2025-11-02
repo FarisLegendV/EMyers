@@ -1,0 +1,129 @@
+local ArrayField = loadstring(game:HttpGet("https://raw.githubusercontent.com/Hosvile/Refinement/main/MC%3AArrayfield%20Library"))()
+
+local Window = ArrayField:CreateWindow({
+    Name = "FarisLegend Hub",
+    LoadingTitle = "ArrayField Interface Suite",
+    LoadingSubtitle = "by FarisLegend",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "FarisLegendHub",
+        FileName = "Config"
+    },
+    KeySystem = true,
+    KeySettings = {
+        Title = "FarisLegend Hub",
+        Subtitle = "Key System",
+        Note = "The key is FarisLegend XDD",
+        FileName = "FarisLegendKey",
+        SaveKey = false,
+        GrabKeyFromSite = false,
+        Key = {"FarisLegend"},
+    }
+})
+
+-- Tab principal
+local MainTab = Window:CreateTab("🏠 Main", 4483362458)
+
+-- Sección World 1
+local World1Section = MainTab:CreateSection("World 1", false) -- false = sección desplegable
+
+local TouchLoopActive = false
+MainTab:CreateToggle({
+    Name = "Auto Touch WinArea",
+    CurrentValue = false,
+    SectionParent = World1Section,
+    Callback = function(Value)
+        TouchLoopActive = Value
+        if TouchLoopActive then
+            task.spawn(function()
+                local player = game.Players.LocalPlayer
+                local hitbox = workspace.Worlds.World1.Meta.WinArea.Hitbox
+                while TouchLoopActive do
+                    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                        firetouchinterest(player.Character.HumanoidRootPart, hitbox, 0)
+                        task.wait(0.1)
+                        firetouchinterest(player.Character.HumanoidRootPart, hitbox, 1)
+                        task.wait(0.1)
+                    else
+                        task.wait(0.1)
+                    end
+                end
+            end)
+        end
+    end
+})
+
+-- Tab 2: Player
+local PlayerTab = Window:CreateTab("🧍 Player", 4483362458)
+
+-- Speed Slider
+PlayerTab:CreateSlider({
+    Name = "Speed",
+    Range = {16, 500},
+    Increment = 1,
+    Suffix = "WS",
+    CurrentValue = 16,
+    Callback = function(Value)
+        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+        end
+    end,
+})
+
+-- Jump Power Slider
+PlayerTab:CreateSlider({
+    Name = "Jump Power",
+    Range = {50, 500},
+    Increment = 1,
+    Suffix = "JP",
+    CurrentValue = 50,
+    Callback = function(Value)
+        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+            game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+        end
+    end,
+})
+
+-- Noclip Toggle
+local NoclipOn = false
+PlayerTab:CreateToggle({
+    Name = "Noclip",
+    CurrentValue = false,
+    Callback = function(Value)
+        NoclipOn = Value
+        game:GetService("RunService").Stepped:Connect(function()
+            if NoclipOn and game.Players.LocalPlayer.Character then
+                for _, part in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            elseif game.Players.LocalPlayer.Character then
+                for _, part in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = true
+                    end
+                end
+            end
+        end)
+    end
+})
+
+-- Infinite Jump
+local InfiniteJump = false
+PlayerTab:CreateToggle({
+    Name = "Infinite Jump",
+    CurrentValue = false,
+    Callback = function(Value)
+        InfiniteJump = Value
+    end
+})
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if InfiniteJump then
+        local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
