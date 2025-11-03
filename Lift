@@ -1,0 +1,121 @@
+--// Librería Tora
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library", true))()
+
+-- Variables globales
+local autoPunchActivo = false
+local tpBossActivo = false
+local autoLiftActivo = false
+local autoSellActivo = false
+
+--// Crear UNA sola GUI
+local mainWindow = library:CreateWindow("FarisLegend")
+
+--// Main: Farm
+local folderFarm = mainWindow:AddFolder("Main")
+folderFarm:AddToggle({
+    text = "Auto Lift",
+    flag = "auto_lift",
+    callback = function(state)
+        autoLiftActivo = state
+    end
+})
+folderFarm:AddToggle({
+    text = "Auto Sell",
+    flag = "auto_sell",
+    callback = function(state)
+        autoSellActivo = state
+    end
+})
+
+--// Event: Main
+local folderMain = mainWindow:AddFolder("Event")
+folderMain:AddToggle({
+    text = "Auto Punch",
+    flag = "auto_punch",
+    callback = function(state)
+        autoPunchActivo = state
+    end
+})
+folderMain:AddToggle({
+    text = "TP Boss",
+    flag = "tp_boss",
+    callback = function(state)
+        tpBossActivo = state
+
+        local Players = game:GetService("Players")
+        local player = Players.LocalPlayer
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+        local head = workspace.Bosses["Hallow Reaper"]["Evil Pumpkin"].Handle
+
+        local attHead = head:FindFirstChild("AlignAttHead") or Instance.new("Attachment", head)
+        attHead.Name = "AlignAttHead"
+
+        local attHRP = hrp:FindFirstChild("AlignAttHRP") or Instance.new("Attachment", hrp)
+        attHRP.Name = "AlignAttHRP"
+        attHRP.Position = Vector3.new(0, 3, 0)
+
+        local alignPos = hrp:FindFirstChild("AlignPosition") or Instance.new("AlignPosition", hrp)
+        alignPos.Attachment0 = attHRP
+        alignPos.Attachment1 = attHead
+        alignPos.MaxForce = 1e5
+        alignPos.Responsiveness = 50
+        alignPos.Enabled = state
+
+        local alignOri = hrp:FindFirstChild("AlignOrientation") or Instance.new("AlignOrientation", hrp)
+        alignOri.Attachment0 = attHRP
+        alignOri.Attachment1 = attHead
+        alignOri.MaxTorque = 1e5
+        alignOri.Responsiveness = 50
+        alignOri.Enabled = state
+    end
+})
+
+--// Loop Auto Punch
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RemoteEvent = ReplicatedStorage:WaitForChild("SharedModules"):WaitForChild("Remote"):WaitForChild("Remotes"):WaitForChild("Remote_Event")
+local waitTimePunch = 0.01
+
+task.spawn(function()
+    while true do
+        if autoPunchActivo then
+            local args = {{"CreateHitbox","Punch"}}
+            RemoteEvent:FireServer(unpack(args))
+            task.wait(waitTimePunch)
+        else
+            task.wait(0.1)
+        end
+    end
+end)
+
+--// Loop Auto Lift NUEVO
+task.spawn(function()
+    while true do
+        if autoLiftActivo then
+            local args = {{"Lift"}}
+            RemoteEvent:FireServer(unpack(args))
+            task.wait(0.5) -- tu tiempo definido
+        else
+            task.wait(0.1)
+        end
+    end
+end)
+
+--// Loop Auto Sell
+local RemoteFunction = ReplicatedStorage:WaitForChild("SharedModules"):WaitForChild("Remote"):WaitForChild("Remotes"):WaitForChild("Remote_Function")
+local waitTimeSell = 0.1
+
+task.spawn(function()
+    while true do
+        if autoSellActivo then
+            local args = {{"Sell"}}
+            RemoteFunction:InvokeServer(unpack(args))
+            task.wait(waitTimeSell)
+        else
+            task.wait(0.1)
+        end
+    end
+end)
+
+--// Inicializar GUI
+library:Init()
