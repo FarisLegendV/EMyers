@@ -1,0 +1,55 @@
+-- Cargar la librería Tora
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library", true))()
+
+-- Crear ventana principal
+local tab = library:CreateWindow("FarisLegend")
+
+-- Crear carpeta Farm
+local folder = tab:AddFolder("Main")
+
+-- 🪙 Auto Coins
+folder:AddToggle({
+    text = "Inf Coins",
+    flag = "autocoins",
+    callback = function(v)
+        getgenv().autoCoins = v
+        task.spawn(function()
+            while getgenv().autoCoins do
+                local args = {
+                    005595966.375894483,
+                    false
+                }
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("FrameWork_Shared")
+                    :WaitForChild("Remotes")
+                    :WaitForChild("Battle")
+                    :WaitForChild("RE_PlayerFinishBattle")
+                    :FireServer(unpack(args))
+                task.wait(0.5) -- velocidad ajustable
+            end
+        end)
+    end
+})
+
+-- 🏆 Auto Trophies
+folder:AddToggle({
+    text = "Auto Trophies",
+    flag = "autotrophies",
+    callback = function(v)
+        getgenv().autoTrophies = v
+        task.spawn(function()
+            while getgenv().autoTrophies do
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("FrameWork_Shared")
+                    :WaitForChild("Remotes")
+                    :WaitForChild("Battle")
+                    :WaitForChild("RE_PlayerTriggerTrophy")
+                    :FireServer()
+                task.wait(0.25) -- rápido pero estable
+            end
+        end)
+    end
+})
+
+-- Inicializar interfaz
+library:Init()
