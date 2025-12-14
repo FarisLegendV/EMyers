@@ -6,7 +6,7 @@ local WindUI = loadstring(game:HttpGet(
 ))()
 
 -- =========================
--- TEMA (SE QUEDA IGUAL)
+-- TEMA
 -- =========================
 WindUI:AddTheme({
     Name = "My Theme",
@@ -41,13 +41,6 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local hum = char:WaitForChild("Humanoid")
-
-player.CharacterAdded:Connect(function(c)
-    char = c
-    hum = c:WaitForChild("Humanoid")
-end)
 
 -- =========================
 -- TAB PLAYER
@@ -58,21 +51,104 @@ local PlayerTab = Window:Tab({
     Locked = false,
 })
 
-PlayerTab:Select()
+-- Variables de estado
+local noclipEnabled = false
+local walkSpeedValue = 16
+local jumpPowerValue = 50
+
+-- Función para configurar un personaje
+local function setupCharacter(char)
+    local hum = char:WaitForChild("Humanoid")
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    -- Aplica valores actuales
+    hum.WalkSpeed = walkSpeedValue
+    hum.JumpPower = jumpPowerValue
+
+    -- Noclip
+    RunService.Stepped:Connect(function()
+        if noclipEnabled and char then
+            for _, part in ipairs(char:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        elseif char then
+            for _, part in ipairs(char:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+    end)
+end
+
+-- Detecta cuando aparece un nuevo personaje
+player.CharacterAdded:Connect(function(c)
+    setupCharacter(c)
+end)
+
+-- Setup inicial
+setupCharacter(player.Character or player.CharacterAdded:Wait())
+
+-- =========================
+-- RESET PLAYER BUTTON
+-- =========================
+PlayerTab:Button({
+    Title = "Reset Player",
+    Desc = "Respawns your character",
+    Callback = function()
+        player:LoadCharacter() -- Respawn correcto
+    end
+})
+
+-- =========================
+-- NOCLIP TOGGLE
+-- =========================
+PlayerTab:Toggle({
+    Title = "Noclip",
+    Desc = "Toggle noclip on/off",
+    Callback = function(state)
+        noclipEnabled = state
+    end
+})
+
+-- =========================
+-- JUMPPOWER SLIDER
+-- =========================
+PlayerTab:Slider({
+    Title = "JumpPower",
+    Desc = "Set your JumpPower",
+    Step = 1,
+    Value = {
+        Min = 1,
+        Max = 200,
+        Default = jumpPowerValue
+    },
+    Callback = function(value)
+        jumpPowerValue = value
+        local hum = player.Character and player.Character:FindFirstChild("Humanoid")
+        if hum then
+            hum.JumpPower = value
+        end
+    end
+})
 
 -- =========================
 -- SPEED SLIDER
 -- =========================
 PlayerTab:Slider({
     Title = "Speed",
-    Desc = "WalkSpeed del jugador",
+    Desc = "Set your WalkSpeed",
     Step = 1,
     Value = {
         Min = 1,
-        Max = 100,
-        Default = 16
+        Max = 200,
+        Default = walkSpeedValue
     },
     Callback = function(value)
+        walkSpeedValue = value
+        local hum = player.Character and player.Character:FindFirstChild("Humanoid")
         if hum then
             hum.WalkSpeed = value
         end
@@ -93,9 +169,8 @@ local MainTab = Window:Tab({
 -- =========================
 MainTab:Button({
     Title = "Find The Brainrot",
-    Desc = "Activa el auto-farm para Brainrot",
+    Desc = "Find all 99 nights in El Campo",
     Callback = function()
-        -- Código para el auto-farm de Brainrot aquí
         print("Find The Brainrot activado") -- Ejemplo
     end
 })
@@ -105,7 +180,7 @@ MainTab:Button({
 -- =========================
 MainTab:Button({
     Title = "MovingDecal",
-    Desc = "Toca automáticamente todos los TouchInterest dentro de movingDecal",
+    Desc = "find everything from the movement decal",
     Callback = function()
         local player = game.Players.LocalPlayer
         local char = player.Character or player.CharacterAdded:Wait()
@@ -138,7 +213,6 @@ MainTab:Button({
 
         -- Detecta nuevos hijos agregados en tiempo real
         movingDecal.ChildAdded:Connect(function(child)
-            -- Pequeña espera para asegurarnos que el Part esté cargado
             task.wait(0.1)
             activateTouch(child)
         end)
