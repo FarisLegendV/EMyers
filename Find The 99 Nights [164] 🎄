@@ -1,0 +1,146 @@
+-- =========================
+-- CARGA DE LIBRERÍA
+-- =========================
+local WindUI = loadstring(game:HttpGet(
+    "https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"
+))()
+
+-- =========================
+-- TEMA (SE QUEDA IGUAL)
+-- =========================
+WindUI:AddTheme({
+    Name = "My Theme",
+    Accent = Color3.fromHex("#18181b"),
+    Background = Color3.fromHex("#101010"),
+    Outline = Color3.fromHex("#FFFFFF"),
+    Text = Color3.fromHex("#FFFFFF"),
+    Placeholder = Color3.fromHex("#7a7a7a"),
+    Button = Color3.fromHex("#52525b"),
+    Icon = Color3.fromHex("#a1a1aa"),
+})
+
+WindUI:SetTheme("My Theme")
+
+-- =========================
+-- VENTANA (FARISLEGEND HUB)
+-- =========================
+local Window = WindUI:CreateWindow({
+    Title = "FarisLegend Hub",
+    Icon = "door-open",
+    Author = "by .ftgs and .ftgs",
+    Folder = "FarisLegend",
+    Theme = "Dark",
+    Size = UDim2.fromOffset(580, 460),
+    MinSize = Vector2.new(560, 350),
+})
+
+-- =========================
+-- SERVICIOS / PLAYER
+-- =========================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hum = char:WaitForChild("Humanoid")
+
+player.CharacterAdded:Connect(function(c)
+    char = c
+    hum = c:WaitForChild("Humanoid")
+end)
+
+-- =========================
+-- TAB PLAYER
+-- =========================
+local PlayerTab = Window:Tab({
+    Title = "Player",
+    Icon = "user",
+    Locked = false,
+})
+
+PlayerTab:Select()
+
+-- =========================
+-- SPEED SLIDER
+-- =========================
+PlayerTab:Slider({
+    Title = "Speed",
+    Desc = "WalkSpeed del jugador",
+    Step = 1,
+    Value = {
+        Min = 1,
+        Max = 100,
+        Default = 16
+    },
+    Callback = function(value)
+        if hum then
+            hum.WalkSpeed = value
+        end
+    end
+})
+
+-- =========================
+-- TAB MAIN
+-- =========================
+local MainTab = Window:Tab({
+    Title = "Main",
+    Icon = "grid",
+    Locked = false,
+})
+
+-- =========================
+-- BOTÓN "Find The Brainrot"
+-- =========================
+MainTab:Button({
+    Title = "Find The Brainrot",
+    Desc = "Activa el auto-farm para Brainrot",
+    Callback = function()
+        -- Código para el auto-farm de Brainrot aquí
+        print("Find The Brainrot activado") -- Ejemplo
+    end
+})
+
+-- =========================
+-- BOTÓN "MovingDecal"
+-- =========================
+MainTab:Button({
+    Title = "MovingDecal",
+    Desc = "Toca automáticamente todos los TouchInterest dentro de movingDecal",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
+        player.CharacterAdded:Connect(function(c)
+            char = c
+            hrp = c:WaitForChild("HumanoidRootPart")
+        end)
+
+        local movingDecal = workspace:WaitForChild("movingDecal")
+
+        -- Función para activar el TouchInterest de un Part
+        local function activateTouch(part)
+            if part:IsA("BasePart") then
+                for _, obj in ipairs(part:GetChildren()) do
+                    if obj:IsA("TouchTransmitter") then
+                        firetouchinterest(hrp, part, 0)
+                        task.wait(0.1)
+                        firetouchinterest(hrp, part, 1)
+                    end
+                end
+            end
+        end
+
+        -- Recorre todos los hijos existentes de movingDecal
+        for _, child in ipairs(movingDecal:GetChildren()) do
+            activateTouch(child)
+        end
+
+        -- Detecta nuevos hijos agregados en tiempo real
+        movingDecal.ChildAdded:Connect(function(child)
+            -- Pequeña espera para asegurarnos que el Part esté cargado
+            task.wait(0.1)
+            activateTouch(child)
+        end)
+    end
+})
