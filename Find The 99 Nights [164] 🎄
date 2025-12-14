@@ -22,10 +22,10 @@ WindUI:AddTheme({
 WindUI:SetTheme("My Theme")
 
 -- =========================
--- VENTANA (FARISLEGEND HUB)
+-- VENTANA (FARISLEGEND)
 -- =========================
 local Window = WindUI:CreateWindow({
-    Title = "FarisLegend Hub",
+    Title = "FarisLegend",
     Icon = "door-open",
     Author = "by .ftgs and .ftgs",
     Folder = "FarisLegend",
@@ -165,7 +165,7 @@ local MainTab = Window:Tab({
 })
 
 -- =========================
--- BOTÓN "Find The Brainrot"
+-- BOTÓN "Find The +99"
 -- =========================
 MainTab:Button({
     Title = "Find The Brainrot",
