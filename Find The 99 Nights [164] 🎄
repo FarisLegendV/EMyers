@@ -168,7 +168,7 @@ local MainTab = Window:Tab({
 -- BOTÓN "Find The +99"
 -- =========================
 MainTab:Button({
-    Title = "Find The Brainrot",
+    Title = "Find The 99 nights",
     Desc = "Find all 99 nights in El Campo",
     Callback = function()
         print("Find The Brainrot activado") -- Ejemplo
