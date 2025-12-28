@@ -1,0 +1,244 @@
+-- =========================
+-- CARGA DE LIBRERÍA
+-- =========================
+local WindUI = loadstring(game:HttpGet(
+    "https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"
+))()
+
+-- =========================
+-- TEMA
+-- =========================
+WindUI:AddTheme({
+    Name = "My Theme",
+    Accent = Color3.fromHex("#18181b"),
+    Background = Color3.fromHex("#101010"),
+    Outline = Color3.fromHex("#FFFFFF"),
+    Text = Color3.fromHex("#FFFFFF"),
+    Placeholder = Color3.fromHex("#7a7a7a"),
+    Button = Color3.fromHex("#52525b"),
+    Icon = Color3.fromHex("#a1a1aa"),
+})
+WindUI:SetTheme("My Theme")
+
+-- =========================
+-- VENTANA
+-- =========================
+local Window = WindUI:CreateWindow({
+    Title = "FarisLegend",
+    Icon = "door-open",
+    Author = "by .ftgs",
+    Folder = "FarisLegendHub",
+    Size = UDim2.fromOffset(580, 460),
+    Transparent = true,
+    Resizable = true,
+})
+
+-- =========================
+-- SERVICIOS
+-- =========================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hum = char:WaitForChild("Humanoid")
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+player.CharacterAdded:Connect(function(c)
+    char = c
+    hum = c:WaitForChild("Humanoid")
+    hrp = c:WaitForChild("HumanoidRootPart")
+end)
+
+-- =========================
+-- TAB HOME
+-- =========================
+local HomeTab = Window:Tab({ Title = "Home", Icon = "home" })
+HomeTab:Select()
+
+-- Player Setting
+local PlayerSection = HomeTab:Section({
+    Title = "Player Setting",
+    Icon = "user",
+    Opened = true,
+})
+
+PlayerSection:Slider({
+    Title = "WalkSpeed",
+    Step = 1,
+    Value = {Min = 1, Max = 200, Default = hum.WalkSpeed},
+    Callback = function(v) hum.WalkSpeed = v end
+})
+
+PlayerSection:Slider({
+    Title = "JumpPower",
+    Step = 1,
+    Value = {Min = 1, Max = 1200, Default = hum.JumpPower},
+    Callback = function(v) hum.JumpPower = v end
+})
+
+local noclip = false
+PlayerSection:Toggle({
+    Title = "Noclip",
+    Callback = function(v) noclip = v end
+})
+
+RunService.Stepped:Connect(function()
+    if noclip then
+        for _,v in pairs(char:GetChildren()) do
+            if v:IsA("BasePart") then v.CanCollide = false end
+        end
+    end
+end)
+
+-- Extras
+HomeTab:Section({ Title = "Extras", Opened = true })
+:Button({
+    Title = "Infinite Yield",
+    Callback = function()
+        loadstring(game:HttpGet(
+            "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"
+        ))()
+    end
+})
+
+-- =========================
+-- TAB MAIN
+-- =========================
+local MainTab = Window:Tab({ Title = "Main", Icon = "activity" })
+
+-- =========================
+-- FARM SECTION
+-- =========================
+local Farm = MainTab:Section({
+    Title = "Farm",
+    Icon = "repeat",
+    Opened = true
+})
+
+-- 🔹 INSTAN STEAL 1-4
+local instanSteal = false
+Farm:Toggle({
+    Title = "Instan Steal Brainrot",
+    Callback = function(v)
+        instanSteal = v
+        task.spawn(function()
+            while instanSteal do
+                local bases = workspace:FindFirstChild("Bases")
+                if bases then
+                    for i = 1,4 do
+                        local base = bases:FindFirstChild("Base"..i)
+                        if base and base:FindFirstChild("CollectZone") then
+                            firetouchinterest(hrp, base.CollectZone, 0)
+                            task.wait()
+                            firetouchinterest(hrp, base.CollectZone, 1)
+                        end
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+})
+
+-- 🔹 AUTO SWING
+local autoSwing = false
+Farm:Toggle({
+    Title = "Auto Swing",
+    Callback = function(v)
+        autoSwing = v
+        task.spawn(function()
+            while autoSwing do
+                ReplicatedStorage.Events.Swing:FireServer("Bat")
+                task.wait(0.05)
+            end
+        end)
+    end
+})
+
+-- 🔹 FAST CUBO
+local fastCubo = false
+Farm:Toggle({
+    Title = "Fast Cubo",
+    Callback = function(v)
+        fastCubo = v
+        task.spawn(function()
+            while fastCubo do
+                ReplicatedStorage.Events.TapCube:FireServer()
+                task.wait(0.05)
+            end
+        end)
+    end
+})
+
+-- 🔹 AUTO COLLECT
+local autoCollect = false
+Farm:Toggle({
+    Title = "Auto Collect",
+    Callback = function(v)
+        autoCollect = v
+        task.spawn(function()
+            while autoCollect do
+                local bases = workspace:FindFirstChild("Bases")
+                if bases then
+                    for _,base in pairs(bases:GetChildren()) do
+                        for _,plot in pairs(base:GetChildren()) do
+                            local collect = plot:FindFirstChild("Collect")
+                            if collect then
+                                firetouchinterest(hrp, collect, 0)
+                                task.wait()
+                                firetouchinterest(hrp, collect, 1)
+                            end
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+})
+
+-- =========================
+-- UPGRADE SECTION
+-- =========================
+local Upgrade = MainTab:Section({
+    Title = "Upgrade",
+    Icon = "chevrons-up",
+    Opened = true
+})
+
+local function autoUpgrade(typeName, state)
+    task.spawn(function()
+        while state() do
+            ReplicatedStorage.Events.UpgradeEvent:FireServer(typeName)
+            task.wait(0.5)
+        end
+    end)
+end
+
+local click, storage, upgrade = false,false,false
+
+Upgrade:Toggle({
+    Title = "ClickLevel",
+    Callback = function(v)
+        click = v
+        autoUpgrade("ClickLevel", function() return click end)
+    end
+})
+
+Upgrade:Toggle({
+    Title = "StorageLevel",
+    Callback = function(v)
+        storage = v
+        autoUpgrade("StorageLevel", function() return storage end)
+    end
+})
+
+Upgrade:Toggle({
+    Title = "UpgradeLevel",
+    Callback = function(v)
+        upgrade = v
+        autoUpgrade("UpgradeLevel", function() return upgrade end)
+    end
+})
