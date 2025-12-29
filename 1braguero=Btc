@@ -1,0 +1,209 @@
+-- =========================
+-- CARGA DE LIBRERÍA
+-- =========================
+local WindUI = loadstring(game:HttpGet(
+    "https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"
+))()
+
+-- =========================
+-- TEMA
+-- =========================
+WindUI:AddTheme({
+    Name = "My Theme",
+    Accent = Color3.fromHex("#18181b"),
+    Background = Color3.fromHex("#101010"),
+    Outline = Color3.fromHex("#FFFFFF"),
+    Text = Color3.fromHex("#FFFFFF"),
+    Placeholder = Color3.fromHex("#7a7a7a"),
+    Button = Color3.fromHex("#52525b"),
+    Icon = Color3.fromHex("#a1a1aa"),
+})
+WindUI:SetTheme("My Theme")
+
+-- =========================
+-- VENTANA
+-- =========================
+local Window = WindUI:CreateWindow({
+    Title = "FarisLegend",
+    Icon = "door-open",
+    Author = "by .ftgs",
+    Folder = "FarisLegendHub",
+    Size = UDim2.fromOffset(580, 460),
+    MinSize = Vector2.new(560, 350),
+    MaxSize = Vector2.new(850, 560),
+    Transparent = true,
+    Theme = "Dark",
+    Resizable = true,
+    SideBarWidth = 200,
+})
+
+-- =========================
+-- SERVICIOS / PLAYER
+-- =========================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hum = char:WaitForChild("Humanoid")
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+player.CharacterAdded:Connect(function(c)
+    char = c
+    hum = c:WaitForChild("Humanoid")
+    hrp = c:WaitForChild("HumanoidRootPart")
+end)
+
+-- =========================
+-- TAB HOME (NO TOCADO)
+-- =========================
+local HomeTab = Window:Tab({
+    Title = "Home",
+    Icon = "home",
+})
+HomeTab:Select()
+
+local PlayerSection = HomeTab:Section({
+    Title = "Player Setting",
+    Icon = "user-circle",
+    Opened = true,
+})
+
+PlayerSection:Slider({
+    Title = "WalkSpeed",
+    Step = 1,
+    Value = {Min = 1, Max = 200, Default = hum.WalkSpeed},
+    Callback = function(v)
+        hum.WalkSpeed = v
+    end
+})
+
+PlayerSection:Slider({
+    Title = "JumpPower",
+    Step = 1,
+    Value = {Min = 1, Max = 1200, Default = hum.JumpPower},
+    Callback = function(v)
+        hum.JumpPower = v
+    end
+})
+
+local NoclipEnabled = false
+PlayerSection:Toggle({
+    Title = "Noclip",
+    Default = false,
+    Callback = function(v)
+        NoclipEnabled = v
+    end
+})
+
+RunService.Stepped:Connect(function()
+    if not char then return end
+    for _, p in pairs(char:GetChildren()) do
+        if p:IsA("BasePart") then
+            p.CanCollide = not NoclipEnabled
+        end
+    end
+end)
+
+local ExtrasSection = HomeTab:Section({
+    Title = "Extras",
+    Icon = "cogs",
+    Opened = true,
+})
+
+ExtrasSection:Button({
+    Title = "Infinite Yield",
+    Callback = function()
+        loadstring(game:HttpGet(
+            "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"
+        ))()
+    end
+})
+
+-- =========================
+-- TAB MAIN
+-- =========================
+local MainTab = Window:Tab({
+    Title = "Main",
+    Icon = "zap",
+})
+
+local FarmSection = MainTab:Section({
+    Title = "Farm",
+    Icon = "wheat",
+    Opened = true,
+})
+
+-- =========================
+-- FLAGS
+-- =========================
+local AutoRebirth = false
+local InfMoney = false
+local AutoStep = false
+
+-- =========================
+-- AUTO REBIRTH
+-- =========================
+FarmSection:Toggle({
+    Title = "Auto Rebirth",
+    Default = false,
+    Callback = function(state)
+        AutoRebirth = state
+        task.spawn(function()
+            while AutoRebirth do
+                game:GetService("ReplicatedStorage")
+                    .Events.Remote.Rebirth.TryRebirth
+                    :InvokeServer()
+                task.wait(1)
+            end
+        end)
+    end
+})
+
+-- =========================
+-- INF MONEY (AUTO HATCH)
+-- =========================
+FarmSection:Toggle({
+    Title = "Inf Money",
+    Default = false,
+    Callback = function(state)
+        InfMoney = state
+        task.spawn(function()
+            while InfMoney do
+                game:GetService("ReplicatedStorage")
+                    .Events.Remote.PetEgg.TryHatch
+                    :InvokeServer("PetEgg_Zone1_Coin", -100000000)
+                task.wait(0.5)
+            end
+        end)
+    end
+})
+
+-- =========================
+-- AUTO STEP BUTTON
+-- =========================
+FarmSection:Toggle({
+    Title = "Auto StepButton",
+    Default = false,
+    Callback = function(state)
+        AutoStep = state
+        task.spawn(function()
+            local zoneSpace = workspace:WaitForChild("ZoneSpace")
+            while AutoStep do
+                for i = 1, 9 do
+                    if not AutoStep then break end
+                    local zone = zoneSpace:FindFirstChild("Zone"..i)
+                    if zone and zone:FindFirstChild("StepButton") then
+                        local part = zone.StepButton:FindFirstChild("Add_Max")
+                            and zone.StepButton.Add_Max:FindFirstChild("TouchPart")
+                        if part then
+                            firetouchinterest(hrp, part, 0)
+                            task.wait(0.05)
+                            firetouchinterest(hrp, part, 1)
+                        end
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+})
