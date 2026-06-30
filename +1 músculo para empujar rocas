@@ -1,0 +1,84 @@
+-- Cargar la librería Tora
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/library", true))()
+
+-- Crear ventana con título "FarisLegend"
+local tab = library:CreateWindow("FarisLegend")
+
+-- Crear carpeta "Main"
+local mainFolder = tab:AddFolder("Main")
+
+--------------------------------------------------
+-- 1. TOGGLE: Fast Train
+--------------------------------------------------
+mainFolder:AddToggle({
+    text = "Fast Train",
+    flag = "fast_train",
+    callback = function(state)
+        _G.FastTrainActive = state
+        if state then
+            -- Iniciar el loop en un hilo separado
+            task.spawn(function()
+                while _G.FastTrainActive do
+                    task.wait(0.005)
+                    local Event = game:GetService("ReplicatedStorage").Packages.Net["RE/ClientTrain"]
+                    for i = 1, 10 do
+                        task.spawn(function()
+                            Event:FireServer()
+                        end)
+                    end
+                end
+            end)
+        end
+    end
+})
+
+--------------------------------------------------
+-- 2. TOGGLE: Auto Rebirth
+--------------------------------------------------
+mainFolder:AddToggle({
+    text = "Auto Rebirth",
+    flag = "auto_rebirth",
+    callback = function(state)
+        _G.AutoRebirthActive = state
+        if state then
+            task.spawn(function()
+                while _G.AutoRebirthActive do
+                    task.wait(0.1)
+                    local Event = game:GetService("ReplicatedStorage").Packages.Net["RE/Rebirth"]
+                    for i = 1, 5 do
+                        task.spawn(function()
+                            Event:FireServer()
+                        end)
+                    end
+                end
+            end)
+        end
+    end
+})
+
+--------------------------------------------------
+-- 3. BOTÓN: Auto Wins
+--------------------------------------------------
+mainFolder:AddButton({
+    text = "Auto Wins",
+    flag = "auto_wins",
+    callback = function()
+        local winPart = workspace.Areas["Spawn World"].Area10.Win
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local rootPart = character:WaitForChild("HumanoidRootPart")
+
+        if winPart and rootPart then
+            firetouchinterest(rootPart, winPart, 0)
+            task.wait(0.01)
+            firetouchinterest(rootPart, winPart, 1)
+        else
+            warn("No se encontró WinPart o RootPart")
+        end
+    end
+})
+
+--------------------------------------------------
+-- INICIALIZAR (OBLIGATORIO)
+--------------------------------------------------
+library:Init()
